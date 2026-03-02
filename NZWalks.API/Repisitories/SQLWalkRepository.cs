@@ -18,11 +18,10 @@ namespace NZWalks.API.Repisitories
             await dbContext.SaveChangesAsync();
             return walk;
         }
-
         public async Task<Walk?> DeleteAsync(Guid id)
         {
-           var existingWalk = await dbContext.Walks
-                .FirstOrDefaultAsync(x => x.Id == id);
+            var existingWalk = await dbContext.Walks
+                 .FirstOrDefaultAsync(x => x.Id == id);
             if (existingWalk == null)
             {
                 return null;
@@ -32,11 +31,40 @@ namespace NZWalks.API.Repisitories
             return existingWalk;
         }
 
-        public async Task<List<Walk>> GetAllAsync()
+        public async Task<List<Walk>> GetAllAsync(string? filterOn = null, string? filterQuery = null,
+            string? sortBy = null, bool isAscending = true)
         {
-            return await dbContext.Walks.Include("Difficulty").Include("Region").ToListAsync();
-        }
+            var walks = dbContext.Walks.Include("Difficulty").Include("Region").AsQueryable();
 
+            //Filtering
+            if (!string.IsNullOrWhiteSpace(filterOn) && !string.IsNullOrWhiteSpace(filterQuery))
+            {
+                if (filterOn.Equals("Name", StringComparison.OrdinalIgnoreCase))
+                {
+                    walks = walks.Where(x => x.Name.Contains(filterQuery));
+                }
+                else if (filterOn.Equals("Description", StringComparison.OrdinalIgnoreCase))
+                {
+                    walks = walks.Where(x => x.Description.Contains(filterQuery));
+                }
+            }
+            //Sorting
+            if (string.IsNullOrWhiteSpace(sortBy) == false)
+            {
+                if (sortBy.Equals("Name", StringComparison.OrdinalIgnoreCase))
+                {
+                    walks = isAscending ? walks.OrderBy(x => x.Name) : walks.OrderByDescending(x => x.Name);
+                }
+                else if(sortBy.Equals("Length", StringComparison.OrdinalIgnoreCase))
+                {
+                    walks = isAscending ? walks.OrderBy(x => x.LengthInKm) : walks.OrderByDescending(x => x.LengthInKm);
+                }
+            }
+
+            return await walks.ToListAsync();
+
+            // return await dbContext.Walks.Include("Difficulty").Include("Region").ToListAsync();
+        }
         public async Task<Walk?> GetByIdAsync(Guid id)
         {
             return await dbContext.Walks
@@ -64,7 +92,5 @@ namespace NZWalks.API.Repisitories
             await dbContext.SaveChangesAsync();
             return existingWalk;
         }
-
-
     }
 }
