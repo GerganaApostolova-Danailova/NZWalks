@@ -29,6 +29,7 @@ public class RegionsController : ControllerBase
     }
     //GET: https://localhost:portnumber/api/regions
     [HttpGet]
+    [Authorize(Roles = "Reader")]
     public async Task<IActionResult> GetAll()
     {
         //Get Data from Database - Domain Models
