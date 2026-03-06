@@ -3,12 +3,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NZWalks.API.CustomActionFilters;
 using NZWalks.API.Data;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repisitories;
 using System.Collections.Generic;
+using System.Data;
+using System.Text.Json;
 
 namespace NZWalks.API.Controllers;
 
@@ -20,24 +23,42 @@ public class RegionsController : ControllerBase
     private readonly NZWalksDbContext dbContext;
     private readonly IRegionRepository regionRepository;
     private readonly IMapper mapper;
+    private readonly ILogger<RegionsController> logger;
 
-    public RegionsController(NZWalksDbContext dbContext, IRegionRepository regionRepository, IMapper mapper)
+    public RegionsController(NZWalksDbContext dbContext,
+        IRegionRepository regionRepository,
+        IMapper mapper,
+        ILogger<RegionsController> logger)
     {
         this.dbContext = dbContext;
         this.regionRepository = regionRepository;
         this.mapper = mapper;
+        this.logger = logger;
     }
     //GET: https://localhost:portnumber/api/regions
     [HttpGet]
-    [Authorize(Roles = "Reader")]
+    //[Authorize(Roles = "Reader")]
     public async Task<IActionResult> GetAll()
     {
-        //Get Data from Database - Domain Models
-        var regionsDomain = await regionRepository.GetAllAsync();
+        try
+        {
+           throw new Exception("This is a custom exception for GetAllRegions");
+            //Get Data from Database - Domain Models
+            var regionsDomain = await regionRepository.GetAllAsync();
 
         //Map domain model to dto model
         //Return Dto back to client
+
+        logger.LogInformation($"Finished GetAllRegions request with data: {JsonSerializer.Serialize(regionsDomain)}");
+
         return Ok(mapper.Map<List<RegionDto>>(regionsDomain));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex,ex.Message);
+            throw;
+        }
+        
     }
 
     //GET: https://localhost:portnumber/api/regions/{id}
