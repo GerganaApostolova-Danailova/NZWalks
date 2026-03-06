@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NZWalks.API.Data;
 using NZWalks.API.Mappings;
+using NZWalks.API.Middlewares;
 using NZWalks.API.Repisitories;
 using NZWalks.API.Repositories;
 using Serilog;
@@ -117,7 +118,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMiddleware<ExceptionHandlerMiddleware>();
+app.UseMiddleware<NZWalks.API.Middlewares.ExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 
