@@ -36,36 +36,23 @@ public class RegionsController : ControllerBase
         this.logger = logger;
     }
     //GET: https://localhost:portnumber/api/regions
+    
     [HttpGet]
     //[Authorize(Roles = "Reader")]
     public async Task<IActionResult> GetAll()
     {
-        try
-        {
-           throw new Exception("This is a custom exception for GetAllRegions");
-            //Get Data from Database - Domain Models
-            var regionsDomain = await regionRepository.GetAllAsync();
+        //Get Data from Database - Domain Models
+        var regionsDomain = await regionRepository.GetAllAsync();
 
         //Map domain model to dto model
-        //Return Dto back to client
-
-        logger.LogInformation($"Finished GetAllRegions request with data: {JsonSerializer.Serialize(regionsDomain)}");
-
         return Ok(mapper.Map<List<RegionDto>>(regionsDomain));
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex,ex.Message);
-            throw;
-        }
-        
     }
 
     //GET: https://localhost:portnumber/api/regions/{id}
 
     [HttpGet]
     [Route("{id:Guid}")]
-    [Authorize(Roles = "Reader")]
+    //[Authorize(Roles = "Reader")]
 
     public async Task<IActionResult> GetById([FromRoute] Guid id)
     {
@@ -83,20 +70,20 @@ public class RegionsController : ControllerBase
     //https://localhost:portnumber/api/regions
     [HttpPost]
     [ValidateModel]
-    [Authorize(Roles = "Writer")]
+    //[Authorize(Roles = "Writer")]
 
     public async Task<IActionResult> Create([FromBody] AddRegionRequestDto addRegionRequestDto)
     {
-            //Map or Convert Dto to Domain Model
-            var regionDomainModel = mapper.Map<Region>(addRegionRequestDto);
+        //Map or Convert Dto to Domain Model
+        var regionDomainModel = mapper.Map<Region>(addRegionRequestDto);
 
-            //Use domain model to create region in database
-            regionDomainModel = await regionRepository.CreateAsync(regionDomainModel);
+        //Use domain model to create region in database
+        regionDomainModel = await regionRepository.CreateAsync(regionDomainModel);
 
-            //Map or Convert Domain model to Dto
-            var regionDto = mapper.Map<RegionDto>(regionDomainModel);
+        //Map or Convert Domain model to Dto
+        var regionDto = mapper.Map<RegionDto>(regionDomainModel);
 
-            return CreatedAtAction(nameof(GetById), new { id = regionDomainModel.Id }, regionDto);
+        return CreatedAtAction(nameof(GetById), new { id = regionDomainModel.Id }, regionDto);
     }
 
 
@@ -105,27 +92,27 @@ public class RegionsController : ControllerBase
     [HttpPut]
     [ValidateModel]
     [Route("{id:Guid}")]
-    [Authorize(Roles = "Writer")]
+    //[Authorize(Roles = "Writer")]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
     {
-            //Map or Convert Dto to Domain Model
-            var regionDomainModel = mapper.Map<Region>(updateRegionRequestDto);
+        //Map or Convert Dto to Domain Model
+        var regionDomainModel = mapper.Map<Region>(updateRegionRequestDto);
 
-            //Check if region exists in database
-            regionDomainModel = await regionRepository.UpdateAsync(id, regionDomainModel);
+        //Check if region exists in database
+        regionDomainModel = await regionRepository.UpdateAsync(id, regionDomainModel);
 
-            if (regionDomainModel == null)
-            {
-                return NotFound();
-            }
-            //Map or Convert Domain model to Dto
-            return Ok(mapper.Map<RegionDto>(regionDomainModel));
+        if (regionDomainModel == null)
+        {
+            return NotFound();
+        }
+        //Map or Convert Domain model to Dto
+        return Ok(mapper.Map<RegionDto>(regionDomainModel));
     }
 
     [HttpDelete]
     [Route("{id:Guid}")]
     //[Authorize(Roles = "Writer")]
-    [Authorize(Roles = "Writer,Reader")]
+    //[Authorize(Roles = "Writer,Reader")]
     public async Task<IActionResult> Delete([FromRoute] Guid id)
     {
         var regionDomainModel = await regionRepository.DeleteAsync(id);
